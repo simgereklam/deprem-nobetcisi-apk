@@ -111,3 +111,23 @@ V1.5 GERÇEK HARİTA:
 NOT:
 Gerçek haritanın yüklenmesi için internet gerekir.
 İlk açılışta harita parçalarının gelmesi birkaç saniye sürebilir.
+
+
+V1.6 PROFESYONEL HARİTA:
+- Önceki basit tile/çizim harita yerine osmdroid MapView kullanıldı.
+- Harita artık gerçek interaktif harita:
+  - Parmakla yakınlaştırma
+  - Parmakla kaydırma
+  - Deprem markerına dokununca bilgi penceresi
+  - Büyüklüğe göre renkli marker
+  - Deprem çevresinde yarı saydam etki dairesi
+  - Kullanıcı konumu markerı
+  - Harita üstünde ölçek ve pusula
+- Alarm testi butonu artık kesilmeyecek şekilde iki satırlı buton düzeni yapıldı.
+- Harita daha büyük ve ana ekranda daha profesyonel görünür.
+
+NOT:
+Bu sürümde Gradle bağımlılığı eklendi:
+implementation 'org.osmdroid:osmdroid-android:6.1.20'
+
+GitHub Actions ilk derlemede bu kütüphaneyi Maven Central'dan indirir.
