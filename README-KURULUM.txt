@@ -93,3 +93,21 @@ V1.4 PROFESYONEL ANA EKRAN HARİTASI:
 NOT:
 Ana ekrandaki Türkiye haritası profesyonel görünüm için yaklaşık çizimdir.
 Deprem noktaları gerçek enlem/boylam koordinatına göre yerleştirilir.
+
+
+V1.5 GERÇEK HARİTA:
+- Basit çizim harita kaldırıldı.
+- Ana ekrana gerçek OpenStreetMap haritası eklendi.
+- Harita parçaları internetten yüklenir ve uygulama içinde görünür.
+- Deprem noktaları gerçek enlem/boylam koordinatına göre harita üstüne yerleşir.
+- Haritanın altında kaç harita parçası yüklendiği yazar. Böylece çalışıp çalışmadığı anlaşılır.
+- Kullanıcı konumu gerçek harita üzerinde görünür.
+- Büyüklüğe göre renkli deprem işareti devam eder:
+  Mavi: 3.0-3.9
+  Turuncu: 4.0-4.9
+  Kırmızı: 5.0+
+- Deprem satırındaki Haritada aç butonu Google Haritalar'ı açmaya devam eder.
+
+NOT:
+Gerçek haritanın yüklenmesi için internet gerekir.
+İlk açılışta harita parçalarının gelmesi birkaç saniye sürebilir.

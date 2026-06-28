@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
     private Spinner radiusSpinner;
     private TextView sourceText, lastCheckText, countText, subInfoText, errorText;
     private Button serviceButton, locationButton;
-    private TurkeyMapView turkeyMapView;
+    private OSMTileMapView osmMapView;
     private LinearLayout quakeList;
 
     private final String[] minLabels = {"Tüm depremler", "2.0 ve üzeri", "3.0 ve üzeri", "4.0 ve üzeri", "5.0 ve üzeri"};
@@ -98,15 +98,15 @@ public class MainActivity extends Activity {
         root.addView(warn);
 
         LinearLayout mapCard = card();
-        TextView mapTitle = text("Türkiye Haritası", 24, Color.WHITE, true);
-        TextView mapSub = text("Depremler bölgesine göre haritada işaretlenir. Mavi: 3-4, turuncu: 4-5, kırmızı: 5+.", 13, Color.rgb(159,178,200), false);
+        TextView mapTitle = text("Gerçek Türkiye Haritası", 24, Color.WHITE, true);
+        TextView mapSub = text("OpenStreetMap gerçek harita üzerinde deprem noktaları gösterilir. Harita parçaları yükleniyorsa internet bağlantısını kontrol et.", 13, Color.rgb(159,178,200), false);
         mapSub.setPadding(0, dp(6), 0, dp(12));
         mapCard.addView(mapTitle);
         mapCard.addView(mapSub);
-        turkeyMapView = new TurkeyMapView(this);
-        LinearLayout.LayoutParams mapLp = lp(-1, dp(250));
-        turkeyMapView.setLayoutParams(mapLp);
-        mapCard.addView(turkeyMapView);
+        osmMapView = new OSMTileMapView(this);
+        LinearLayout.LayoutParams mapLp = lp(-1, dp(280));
+        osmMapView.setLayoutParams(mapLp);
+        mapCard.addView(osmMapView);
         root.addView(mapCard);
 
         LinearLayout controls = card();
@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
                     runOnUiThread(() -> render(result));
                 } catch (Exception e) {
                     runOnUiThread(() -> {
-                        if (turkeyMapView != null) turkeyMapView.setMapData(new ArrayList<Quake>(), false, 0, 0);
+                        if (osmMapView != null) osmMapView.setMapData(new ArrayList<Quake>(), false, 0, 0);
                         sourceText.setText("Hata");
                         lastCheckText.setText(EarthquakeApi.formatTime(System.currentTimeMillis()));
                         countText.setText("0");
@@ -249,13 +249,14 @@ public class MainActivity extends Activity {
             }
 
             visibleQuakes.add(q);
+            visibleQuakes.add(q);
             quakeList.addView(quakeRow(q));
             count++;
             if (count >= 80) break;
         }
 
-        if (turkeyMapView != null) {
-            turkeyMapView.setMapData(visibleQuakes, hasLocation, userLat, userLon);
+        if (osmMapView != null) {
+            osmMapView.setMapData(visibleQuakes, hasLocation, userLat, userLon);
         }
 
         sourceText.setText(result.sourceName);
