@@ -49,3 +49,47 @@ TELEFONDA KULLANIM:
 NOT:
 Android arka plan kısıtları telefondan telefona değişir.
 En sağlam kullanım için pil tasarrufundan bu uygulamayı hariç tut.
+
+
+V1.1 DÜZELTME:
+- Seçim kutularındaki siyah yazı problemi düzeltildi.
+- Yazılar beyaz ve kalın yapıldı.
+
+
+V1.2 GELİŞTİRME:
+- Alarm testi butonu eklendi.
+- Deprem bildirimlerine alarm sesi ve titreşim eklendi.
+- Depremin yaklaşık Türkiye bölgesi yazdırıldı.
+- Haritada aç butonu uygulama içi harita ekranına çevrildi.
+- Haritada OpenStreetMap tabanı ve deprem merkez işareti gösterilir.
+- Haritada büyüklüğe göre etki dairesi görsel olarak büyür.
+
+NOT:
+Harita ekranı için internet gerekir.
+Android bazı telefonlarda bildirim sesini sistem ayarlarındaki kanal sesine göre kısabilir.
+Uygulama ayarlarından "Deprem Uyarıları" bildirim kanalının sesi açık olmalı.
+
+
+V1.3 HARİTA DÜZELTMESİ:
+- Uygulama içi WebView haritası bazı telefonlarda açılmadığı için değiştirildi.
+- "Haritada aç" butonu artık Google Haritalar / tarayıcı haritasını açar.
+- Depremin enlem ve boylam noktası doğrudan haritada gösterilir.
+- Bu yöntem daha garantili çalışır.
+
+
+V1.4 PROFESYONEL ANA EKRAN HARİTASI:
+- Ana ekrana Türkiye haritası eklendi.
+- Depremler harita üzerinde nokta olarak gösterilir.
+- Büyüklüğe göre renk:
+  Mavi: 3.0-3.9
+  Turuncu: 4.0-4.9
+  Kırmızı: 5.0+
+- Marmara, Ege, Akdeniz, İç Anadolu, Karadeniz, Doğu Anadolu, Güneydoğu Anadolu bölgeleri yazdırılır.
+- Kullanıcı konumu haritada mavi nokta olarak görünür.
+- Harita liste filtresine göre güncellenir.
+- Haritada internet gerekmez; ana ekran haritası native çizimdir.
+- Deprem satırındaki "Haritada aç" butonu ayrıca Google Haritalar'da nokta açmaya devam eder.
+
+NOT:
+Ana ekrandaki Türkiye haritası profesyonel görünüm için yaklaşık çizimdir.
+Deprem noktaları gerçek enlem/boylam koordinatına göre yerleştirilir.

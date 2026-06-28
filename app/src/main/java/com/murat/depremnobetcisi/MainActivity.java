@@ -12,11 +12,14 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,6 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +47,7 @@ public class MainActivity extends Activity {
     private Spinner radiusSpinner;
     private TextView sourceText, lastCheckText, countText, subInfoText, errorText;
     private Button serviceButton, locationButton;
+    private TurkeyMapView turkeyMapView;
     private LinearLayout quakeList;
 
     private final String[] minLabels = {"Tüm depremler", "2.0 ve üzeri", "3.0 ve üzeri", "4.0 ve üzeri", "5.0 ve üzeri"};
@@ -92,6 +97,18 @@ public class MainActivity extends Activity {
         warn.setBackground(cardBg(Color.rgb(32,31,25), Color.rgb(115,84,30)));
         root.addView(warn);
 
+        LinearLayout mapCard = card();
+        TextView mapTitle = text("Türkiye Haritası", 24, Color.WHITE, true);
+        TextView mapSub = text("Depremler bölgesine göre haritada işaretlenir. Mavi: 3-4, turuncu: 4-5, kırmızı: 5+.", 13, Color.rgb(159,178,200), false);
+        mapSub.setPadding(0, dp(6), 0, dp(12));
+        mapCard.addView(mapTitle);
+        mapCard.addView(mapSub);
+        turkeyMapView = new TurkeyMapView(this);
+        LinearLayout.LayoutParams mapLp = lp(-1, dp(250));
+        turkeyMapView.setLayoutParams(mapLp);
+        mapCard.addView(turkeyMapView);
+        root.addView(mapCard);
+
         LinearLayout controls = card();
         root.addView(controls);
 
@@ -117,14 +134,17 @@ public class MainActivity extends Activity {
         Button refresh = button("Yenile", true);
         serviceButton = button("Nöbeti başlat", false);
         locationButton = button("Konumumu al", false);
+        Button alarmTest = button("Alarm testi", false);
 
         actions.addView(refresh);
         actions.addView(serviceButton);
         actions.addView(locationButton);
+        actions.addView(alarmTest);
 
         refresh.setOnClickListener(v -> refreshData());
         serviceButton.setOnClickListener(v -> toggleService());
         locationButton.setOnClickListener(v -> getLocationNow());
+        alarmTest.setOnClickListener(v -> playAlarmTest());
 
         root.addView(statCard("KAYNAK"));
         sourceText = (TextView) ((LinearLayout) root.getChildAt(root.getChildCount()-1)).getChildAt(1);
@@ -196,6 +216,7 @@ public class MainActivity extends Activity {
                     runOnUiThread(() -> render(result));
                 } catch (Exception e) {
                     runOnUiThread(() -> {
+                        if (turkeyMapView != null) turkeyMapView.setMapData(new ArrayList<Quake>(), false, 0, 0);
                         sourceText.setText("Hata");
                         lastCheckText.setText(EarthquakeApi.formatTime(System.currentTimeMillis()));
                         countText.setText("0");
@@ -216,6 +237,7 @@ public class MainActivity extends Activity {
 
         quakeList.removeAllViews();
         int count = 0;
+        ArrayList<Quake> visibleQuakes = new ArrayList<>();
 
         for (Quake q : result.quakes) {
             if (q.mag < minMag) continue;
@@ -226,9 +248,14 @@ public class MainActivity extends Activity {
                 if (q.distanceKm > radius) continue;
             }
 
+            visibleQuakes.add(q);
             quakeList.addView(quakeRow(q));
             count++;
             if (count >= 80) break;
+        }
+
+        if (turkeyMapView != null) {
+            turkeyMapView.setMapData(visibleQuakes, hasLocation, userLat, userLon);
         }
 
         sourceText.setText(result.sourceName);
@@ -270,7 +297,7 @@ public class MainActivity extends Activity {
         info.addView(place);
 
         String dist = q.distanceKm >= 0 ? " • Yaklaşık " + Math.round(q.distanceKm) + " km" : "";
-        TextView meta = text(q.timeText + " • Derinlik " + String.format(Locale.US, "%.1f", q.depth) + " km" + dist
+        TextView meta = text(q.region + "\n" + q.timeText + " • Derinlik " + String.format(Locale.US, "%.1f", q.depth) + " km" + dist
                 + "\nKaynak: " + q.source, 13, Color.rgb(159,178,200), false);
         meta.setPadding(0, dp(5), 0, dp(8));
         info.addView(meta);
@@ -278,9 +305,19 @@ public class MainActivity extends Activity {
         Button map = button("Haritada aç", false);
         map.setTextSize(12);
         map.setOnClickListener(v -> {
-            String uri = "geo:" + q.lat + "," + q.lon + "?q=" + q.lat + "," + q.lon + "(" + Uri.encode(q.place) + ")";
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-            startActivity(intent);
+            try {
+                String url = "https://www.google.com/maps/search/?api=1&query=" + q.lat + "," + q.lon;
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            } catch (Exception e) {
+                try {
+                    String geo = "geo:" + q.lat + "," + q.lon + "?q=" + q.lat + "," + q.lon + "(" + Uri.encode(q.place) + ")";
+                    Intent intent2 = new Intent(Intent.ACTION_VIEW, Uri.parse(geo));
+                    startActivity(intent2);
+                } catch (Exception ex) {
+                    Toast.makeText(this, "Harita açılamadı. İnternet ve Haritalar uygulamasını kontrol et.", Toast.LENGTH_LONG).show();
+                }
+            }
         });
         info.addView(map);
 
@@ -380,10 +417,24 @@ public class MainActivity extends Activity {
         if (requestCode == REQ_NOTIF) toggleService();
     }
 
+
+    private void playAlarmTest() {
+        try {
+            ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+            tg.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 900);
+            Toast.makeText(this, "Alarm sesi testi", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Alarm sesi çalınamadı: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void createChannels() {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.createNotificationChannel(new NotificationChannel(EarthquakeService.CHANNEL_ALERTS, "Deprem Uyarıları", NotificationManager.IMPORTANCE_HIGH));
+        NotificationChannel ch = new NotificationChannel(EarthquakeService.CHANNEL_ALERTS, "Deprem Uyarıları", NotificationManager.IMPORTANCE_HIGH);
+        ch.enableVibration(true);
+        ch.setVibrationPattern(new long[]{0, 500, 250, 500, 250, 800});
+        nm.createNotificationChannel(ch);
         nm.createNotificationChannel(new NotificationChannel(EarthquakeService.CHANNEL_SERVICE, "Nöbet Servisi", NotificationManager.IMPORTANCE_LOW));
     }
 
@@ -404,7 +455,31 @@ public class MainActivity extends Activity {
 
     private Spinner spinner(String[] labels) {
         Spinner s = new Spinner(this);
-        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, labels);
+
+        ArrayAdapter<String> ad = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, labels) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView v = (TextView) super.getView(position, convertView, parent);
+                v.setTextColor(Color.WHITE);
+                v.setTextSize(17);
+                v.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                v.setPadding(dp(12), 0, dp(12), 0);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                TextView v = (TextView) super.getDropDownView(position, convertView, parent);
+                v.setTextColor(Color.WHITE);
+                v.setTextSize(17);
+                v.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                v.setBackgroundColor(Color.rgb(19,43,70));
+                v.setPadding(dp(16), dp(16), dp(16), dp(16));
+                return v;
+            }
+        };
+
+        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(ad);
         s.setPadding(dp(10), dp(5), dp(10), dp(5));
         s.setBackground(cardBg(Color.rgb(19,43,70), Color.rgb(55,80,118)));

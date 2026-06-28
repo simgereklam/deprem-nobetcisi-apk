@@ -13,6 +13,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.media.AudioAttributes;
+import android.net.Uri;
+import android.provider.Settings;
 
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +111,7 @@ public class EarthquakeService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | pendingImmutableFlag());
 
         String title = "Deprem uyarısı: " + String.format("%.1f", q.mag);
-        String body = q.place + " • " + q.timeText + " • Derinlik " + String.format("%.1f", q.depth) + " km";
+        String body = q.region + " • " + q.place + " • " + q.timeText + " • Derinlik " + String.format("%.1f", q.depth) + " km";
 
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ALERTS)
@@ -120,7 +123,9 @@ public class EarthquakeService extends Service {
                 .setStyle(new Notification.BigTextStyle().bigText(body))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
-                .setPriority(Notification.PRIORITY_HIGH);
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setVibrate(new long[]{0, 500, 250, 500, 250, 800});
 
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         nm.notify((int) (System.currentTimeMillis() % 100000), b.build());
@@ -155,6 +160,14 @@ public class EarthquakeService extends Service {
                 NotificationManager.IMPORTANCE_HIGH
         );
         alerts.setDescription("Eşik üstü yeni deprem bildirimleri");
+        alerts.enableVibration(true);
+        alerts.setVibrationPattern(new long[]{0, 500, 250, 500, 250, 800});
+        Uri alarmSound = Settings.System.DEFAULT_ALARM_ALERT_URI;
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        alerts.setSound(alarmSound, audioAttributes);
 
         NotificationChannel service = new NotificationChannel(
                 CHANNEL_SERVICE,

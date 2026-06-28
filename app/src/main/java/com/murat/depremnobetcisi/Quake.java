@@ -10,6 +10,7 @@ public class Quake {
     public double lat;
     public double lon;
     public String source;
+    public String region;
     public double distanceKm = -1;
 
     public Quake(String id, double mag, String place, String timeText, long timeMs,
@@ -23,5 +24,6 @@ public class Quake {
         this.lat = lat;
         this.lon = lon;
         this.source = source;
+        this.region = EarthquakeApi.regionOf(lat, lon, place);
     }
 }

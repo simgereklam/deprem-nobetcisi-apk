@@ -253,6 +253,59 @@ public class EarthquakeApi {
         return f.format(new Date(tm));
     }
 
+
+    public static String regionOf(double lat, double lon, String place) {
+        String p = place == null ? "" : place.toLowerCase(new Locale("tr", "TR"));
+
+        if (p.contains("marmara") || p.contains("istanbul") || p.contains("tekirdağ") || p.contains("tekirdag")
+                || p.contains("kocaeli") || p.contains("sakarya") || p.contains("bursa") || p.contains("yalova")
+                || p.contains("balıkesir") || p.contains("balikesir") || p.contains("çanakkale") || p.contains("canakkale")
+                || p.contains("edirne") || p.contains("kırklareli") || p.contains("kirklareli")) return "Marmara Bölgesi";
+
+        if (p.contains("ege") || p.contains("izmir") || p.contains("manisa") || p.contains("aydın") || p.contains("aydin")
+                || p.contains("muğla") || p.contains("mugla") || p.contains("denizli") || p.contains("uşak") || p.contains("usak")
+                || p.contains("kütahya") || p.contains("kutahya") || p.contains("afyon")) return "Ege Bölgesi";
+
+        if (p.contains("akdeniz") || p.contains("antalya") || p.contains("mersin") || p.contains("adana")
+                || p.contains("hatay") || p.contains("osmaniye") || p.contains("ısparta") || p.contains("isparta")
+                || p.contains("burdur") || p.contains("kahramanmaraş") || p.contains("kahramanmaras")) return "Akdeniz Bölgesi";
+
+        if (p.contains("karadeniz") || p.contains("samsun") || p.contains("trabzon") || p.contains("ordu")
+                || p.contains("rize") || p.contains("giresun") || p.contains("sinop") || p.contains("kastamonu")
+                || p.contains("zonguldak") || p.contains("bolu") || p.contains("düzce") || p.contains("duzce")
+                || p.contains("bartın") || p.contains("bartin") || p.contains("amasya") || p.contains("tokat")
+                || p.contains("çorum") || p.contains("corum")) return "Karadeniz Bölgesi";
+
+        if (p.contains("iç anadolu") || p.contains("ic anadolu") || p.contains("ankara") || p.contains("konya")
+                || p.contains("kayseri") || p.contains("eskişehir") || p.contains("eskisehir") || p.contains("sivas")
+                || p.contains("kırıkkale") || p.contains("kirikkale") || p.contains("kırşehir") || p.contains("kirsehir")
+                || p.contains("aksaray") || p.contains("niğde") || p.contains("nigde") || p.contains("nevşehir")
+                || p.contains("nevsehir") || p.contains("karaman") || p.contains("yozgat")) return "İç Anadolu Bölgesi";
+
+        if (p.contains("güneydoğu") || p.contains("guneydogu") || p.contains("gaziantep") || p.contains("şanlıurfa")
+                || p.contains("sanliurfa") || p.contains("diyarbakır") || p.contains("diyarbakir") || p.contains("mardin")
+                || p.contains("batman") || p.contains("siirt") || p.contains("şırnak") || p.contains("sirnak")
+                || p.contains("adıyaman") || p.contains("adiyaman") || p.contains("kilis")) return "Güneydoğu Anadolu Bölgesi";
+
+        if (p.contains("doğu anadolu") || p.contains("dogu anadolu") || p.contains("erzurum") || p.contains("erzincan")
+                || p.contains("malatya") || p.contains("elazığ") || p.contains("elazig") || p.contains("bingöl")
+                || p.contains("bingol") || p.contains("van") || p.contains("ağrı") || p.contains("agri")
+                || p.contains("kars") || p.contains("muş") || p.contains("mus") || p.contains("bitlis")
+                || p.contains("hakkari") || p.contains("tunceli") || p.contains("ığdır") || p.contains("igdir")
+                || p.contains("ardahan")) return "Doğu Anadolu Bölgesi";
+
+        // Koordinata göre yaklaşık Türkiye bölge tahmini
+        if (lat >= 40.0 && lon <= 31.5) return "Marmara Bölgesi";
+        if (lat < 40.2 && lon <= 30.8) return "Ege Bölgesi";
+        if (lat < 38.2 && lon > 30.8 && lon < 37.5) return "Akdeniz Bölgesi";
+        if (lat >= 40.0 && lon > 31.5 && lon < 42.5) return "Karadeniz Bölgesi";
+        if (lat >= 38.0 && lat < 40.5 && lon >= 30.8 && lon < 38.5) return "İç Anadolu Bölgesi";
+        if (lat < 38.8 && lon >= 37.0 && lon < 42.5) return "Güneydoğu Anadolu Bölgesi";
+        if (lon >= 38.5) return "Doğu Anadolu Bölgesi";
+
+        return "Bölge tahmini yok";
+    }
+
     public static double distanceKm(double lat1, double lon1, double lat2, double lon2) {
         double R = 6371.0;
         double dLat = Math.toRadians(lat2 - lat1);
